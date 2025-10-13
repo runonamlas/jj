@@ -58,19 +58,39 @@
   <iframe src="https://drive.google.com/file/d/1tNQtSCW_ESOKkpLCXcfZixyM50FbR1vQ/preview" allow="autoplay"></iframe>
   <iframe src="https://drive.google.com/file/d/1SLC90oyPqcBHRV8iJEcsi1ZVhWCig3LY/preview" allow="autoplay"></iframe>
 
-  <script>
+    <script>
     const iframes = document.querySelectorAll("iframe");
+    const durations = [180, 120, 240]; // her videonun süresi (saniye)
     let current = 0;
 
-    function showNext() {
+    function playVideo() {
+      // tüm videoları gizle
       iframes.forEach(f => f.style.display = "none");
-      iframes[current].style.display = "block";
-      current = (current + 1) % iframes.length;
-      // Süreyi videoların ortalama uzunluğuna göre ayarla (ms cinsinden)
-      setTimeout(showNext, 60000); // 2 dakika
+
+      // sıradakini göster
+      const frame = iframes[current];
+      frame.style.display = "block";
+
+      // autoplay tetikle
+      frame.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+
+      // süre dolunca sıradakine geç
+      setTimeout(() => {
+        current = (current + 1) % iframes.length;
+        playVideo();
+      }, durations[current] * 1000);
     }
 
-    showNext();
+    // sayfa yüklenince otomatik başlat
+    window.onload = () => {
+      // mobil cihazlarda autoplay engeli varsa, sessiz başlatmak işe yarar
+      if (iframes[0].contentWindow) {
+        playVideo();
+      } else {
+        // bazı TV tarayıcılarında iframe hemen hazır olmaz, kısa gecikme ekleyelim
+        setTimeout(playVideo, 2000);
+      }
+    };
   </script>
 </body>
 </html>
