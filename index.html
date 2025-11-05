@@ -148,8 +148,8 @@
 
       function playVideo(i) {
         index = i;
-        const video = playlist[index];
-        player.src = video.url;
+        const videoUrl = ${BASE_URL}/${playlist[index].name};
+        player.src = videoUrl;
         player.play().catch(console.error);
         document.getElementById("info").textContent = video.name;
       }
