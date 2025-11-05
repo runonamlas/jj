@@ -85,8 +85,8 @@
       }
 
       function playNext() {
-        console.log(plaslist[index]);
-        player.src = plaslist[index].url;
+        console.log(playlist[index]);
+        player.src = playlist[index].url;
         player.play();
         player.onended = () => {
           index = (index + 1) % playlist.length;
