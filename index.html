@@ -206,7 +206,7 @@
         stocksDiv.innerHTML = stocks.map(s => `
           <div class="stock">
             <span>${s.name}</span>
-            <span style="color:${s.change >= 0 ? '#0f0' : '#f33'}">
+            <span style="color:#0f0">
               ${s.value.toFixed(2)}
             </span>
           </div>
