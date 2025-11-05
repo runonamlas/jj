@@ -158,7 +158,7 @@
       // Buraya Cloudflare R2 panelinizden aldığınız ...pub.r2.dev adresinizi yazın.
       const BASE_URL = "https://winkeltv.dpdns.org";
       const PLAYLIST_URL = `${BASE_URL}/videos.json`;
-
+      const FINANCE_API_URL = "https://api.finans.truncgil.com/v4/sondurumbilgileri";
       const player = document.getElementById("player");
       const clock = document.getElementById("clock");
       const stocksDiv = document.getElementById("stocks");
@@ -222,16 +222,38 @@
 
 
       // 📊 Sahte borsa verisi (örnek)
-      const stocks = [
-        { name: "BIST 100", value: 9564.22, change: +0.84 },
-        { name: "USD/TRY", value: 34.18, change: -0.12 },
-        { name: "EUR/TRY", value: 36.45, change: +0.05 },
-        { name: "ALTIN", value: 2522.1, change: +0.42 },
-        { name: "GÜMÜŞ", value: 31.5, change: -0.20 },
-        { name: "PETROL", value: 88.4, change: +1.10 },
-      ];
+      const stocks = [];
 
+      function formatApiData(apiData) {
+        const filteredData = [];
+        const itemsToGet = {
+          "USDTRY": "USD/TRY",
+          "EURTRY": "EUR/TRY",
+          "gram-altin": "ALTIN (GR)",
+          "GBPTRY": "GBP/TRY",
+          "BIST100": "BIST 100" // Bu API BIST 100'ü destekliyorsa
+        };
+
+        for (const key in itemsToGet) {
+          const item = apiData.find(d => d.Symbol === key);
+          if (item) {
+            filteredData.push({
+              name: itemsToGet[key],
+              value: parseFloat(item.Price),
+              change: parseFloat(item.ChangeRate)
+            });
+          }
+        }
+        return filteredData;
+      }
+
+      // 📊 Sağdaki paneli güncelle
       function renderStocks() {
+        if (stocks.length === 0) {
+            stocksDiv.innerHTML = "Veriler yükleniyor...";
+            return;
+        }
+        
         stocksDiv.innerHTML = stocks.map(s => `
           <div class="stock">
             <span>${s.name}</span>
@@ -241,16 +263,48 @@
           </div>
         `).join('');
       }
-      renderStocks();
 
-      // 💱 Kayan kurlar
+      // 💱 Alttaki kayan kurları güncelle
       function updateTicker() {
+        if (stocks.length === 0) {
+            tickerText.textContent = "Yükleniyor...";
+            return;
+        }
         tickerText.textContent = stocks.map(s =>
           `${s.name}: ${s.value.toFixed(2)} (${s.change >= 0 ? '▲' : '▼'}${Math.abs(s.change)}%)`
         ).join(" | ");
       }
-      updateTicker();
-      setInterval(updateTicker, 10000);
+
+      // 🚀 Ana Veri Yükleme Fonksiyonu
+      async function loadFinancialData() {
+        console.log("Finans verileri çekiliyor...");
+        try {
+          const res = await fetch(FINANCE_API_URL);
+          if (!res.ok) throw new Error('API yanıt vermiyor');
+          
+          const data = await res.json();
+          
+          // Gelen veriyi işle ve global 'stocks' dizisini güncelle
+          stocks = formatApiData(data);
+          
+          // Veriler geldiğine göre şimdi ekrana yazdırabiliriz
+          renderStocks();
+          updateTicker();
+          
+        } catch (err) {
+          console.error("Finans verisi çekilemedi:", err);
+          stocksDiv.innerHTML = "<span style='color:#f33'>Veri alınamadı.</span>";
+          tickerText.textContent = "Finans verileri yüklenemedi.";
+        }
+      }
+
+      // --- SAYFA AÇILIŞI ---
+
+      // 1. Sahte veriyi kaldırıp, ilk veriyi çek
+      loadFinancialData();
+      
+      // 2. Her 5 dakikada bir (300,000 milisaniye) verileri otomatik güncelle
+      setInterval(loadFinancialData, 300000);
     </script>
   </body>
 </html>
