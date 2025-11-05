@@ -103,25 +103,6 @@
         font-size: 16px;
       }
 
-      /* Alttaki kayan kurlar */
-      #ticker {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background: rgba(255,255,255,0.1);
-        color: #00ffcc;
-        white-space: nowrap;
-        overflow: hidden;
-        z-index: 20; /* Her zaman en üstte */
-      }
-
-      #ticker span {
-        display: inline-block;
-        padding-left: 100%;
-        animation: scroll 25s linear infinite;
-      }
-
       @keyframes scroll {
         from { transform: translateX(0); }
         to { transform: translateX(-100%); }
@@ -160,8 +141,6 @@
       const player = document.getElementById("player");
       const clock = document.getElementById("clock");
       const stocksDiv = document.getElementById("stocks");
-      const tickerText = document.getElementById("ticker-text");
-
       // YENİ: Buton elemanları
       const playButton = document.getElementById("playButton");
       const playOverlay = document.getElementById("play-overlay");
@@ -223,7 +202,6 @@
       let stocks = [];
 
       function formatApiData(apiData) {
-        console.log(apiData);
         const filteredData = [];
         for (const key in apiData) {
             filteredData.push({
@@ -252,16 +230,7 @@
       }
 
       // 💱 Alttaki kayan kurları güncelle
-      function updateTicker() {
-        if (stocks.length === 0) {
-            tickerText.textContent = "Yükleniyor...";
-            return;
-        }
-        tickerText.textContent = stocks.map(s =>
-          `${s.name}: ${s.value.toFixed(2)} (${s.change >= 0 ? '▲' : '▼'}${Math.abs(s.change)}%)`
-        ).join(" | ");
-      }
-
+      
       // 🚀 Ana Veri Yükleme Fonksiyonu
       async function loadFinancialData() {
         console.log("Finans verileri çekiliyor...");
@@ -272,17 +241,13 @@
           const data = await res.json();
           
           // Gelen veriyi işle ve global 'stocks' dizisini güncelle
-          console.log(data);
           stocks = formatApiData(data.currencies);
           
           // Veriler geldiğine göre şimdi ekrana yazdırabiliriz
-          renderStocks();
-          updateTicker();
-          
+          renderStocks();          
         } catch (err) {
           console.error("Finans verisi çekilemedi:", err);
           stocksDiv.innerHTML = "<span style='color:#f33'>Veri alınamadı.</span>";
-          tickerText.textContent = "Finans verileri yüklenemedi.";
         }
       }
 
