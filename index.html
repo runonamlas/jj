@@ -86,6 +86,8 @@
 
       function playNext() {
         const videoUrl = `${BASE_URL}/${playlist[index]}`;
+        console.log(videoUrl);
+        console.log(playlist);
         player.src = videoUrl;
         player.play();
         player.onended = () => {
