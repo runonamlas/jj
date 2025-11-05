@@ -282,6 +282,7 @@
           const data = await res.json();
           
           // Gelen veriyi işle ve global 'stocks' dizisini güncelle
+          console.log(data);
           stocks = formatApiData(data.currencies);
           
           // Veriler geldiğine göre şimdi ekrana yazdırabiliriz
