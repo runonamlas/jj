@@ -25,7 +25,7 @@
       #video-container {
         position: relative;
         width: 75%;
-        height: auto;
+        height: 100%; /* Yüksekliği 100% yap */
         background: black;
       }
 
@@ -35,6 +35,32 @@
         object-fit: contain;
         background: black;
       }
+
+      /* --- YENİ: Oynat Butonu Stili --- */
+      #play-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
+        cursor: pointer;
+      }
+      #playButton {
+        font-size: 24px;
+        padding: 15px 30px;
+        background: #00ffcc;
+        color: #111;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      /* --- Bitiş: Oynat Butonu Stili --- */
+
 
       /* Saat ve bilgi overlay */
       .overlay {
@@ -48,11 +74,13 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        z-index: 5; /* Butonun altında kalsın */
       }
 
       /* Sağdaki borsa paneli */
       #sidebar {
         width: 25%;
+        height: 100vh; /* Tam yükseklik */
         background: #111;
         display: flex;
         flex-direction: column;
@@ -60,6 +88,7 @@
         padding: 12px;
         box-sizing: border-box;
         border-left: 2px solid #222;
+        overflow-y: auto; /* Gerekirse kaydırma çubuğu */
       }
 
       #sidebar h3 {
@@ -84,6 +113,7 @@
         color: #00ffcc;
         white-space: nowrap;
         overflow: hidden;
+        z-index: 20; /* Her zaman en üstte */
       }
 
       #ticker span {
@@ -101,7 +131,13 @@
   <body>
     <div id="layout">
       <div id="video-container">
-        <video id="player" autoplay muted></video>
+        
+        <video id="player"></video>
+
+        <div id="play-overlay">
+            <button id="playButton">▶ OYNAT</button>
+        </div>
+
         <div class="overlay">
           <div id="info">Winkel TV</div>
           <div id="clock"></div>
@@ -117,12 +153,20 @@
     <div id="ticker"><span id="ticker-text">Yükleniyor...</span></div>
 
     <script>
+      // !!! ÇOK ÖNEMLİ: DONMA SORUNU ÇÖZÜMÜ !!!
+      // "winkeltv.dpdns.org" adresi ev/ofis internetinizdir ve YAVAŞTIR.
+      // Buraya Cloudflare R2 panelinizden aldığınız ...pub.r2.dev adresinizi yazın.
       const BASE_URL = "https://winkeltv.dpdns.org";
       const PLAYLIST_URL = `${BASE_URL}/videos.json`;
+
       const player = document.getElementById("player");
       const clock = document.getElementById("clock");
       const stocksDiv = document.getElementById("stocks");
       const tickerText = document.getElementById("ticker-text");
+
+      // YENİ: Buton elemanları
+      const playButton = document.getElementById("playButton");
+      const playOverlay = document.getElementById("play-overlay");
 
       let playlist = [];
       let index = 0;
@@ -140,7 +184,13 @@
           const res = await fetch(PLAYLIST_URL);
           const data = await res.json();
           playlist = data.videos || [];
-          if (playlist.length > 0) playVideo(0);
+          if (playlist.length > 0) {
+            // DEĞİŞİKLİK: Videoyu hemen başlatma, sadece ilk videoyu yükle
+            index = 0;
+            const videoUrl = `${BASE_URL}/${playlist[index].name}`;
+            player.src = videoUrl;
+            // playVideo(0); // Bu satır kaldırıldı
+          }
         } catch (err) {
           console.error("Video listesi yüklenemedi:", err);
         }
@@ -160,12 +210,25 @@
 
       loadPlaylist();
 
+      // YENİ: Butona tıklayınca videoyu sesli başlatma
+      playButton.addEventListener("click", () => {
+        player.play().then(() => {
+          // Oynatma başarılı olursa butonu gizle
+          playOverlay.style.display = "none";
+        }).catch(err => {
+          console.error("Video başlatılamadı:", err);
+        });
+      });
+
+
       // 📊 Sahte borsa verisi (örnek)
       const stocks = [
         { name: "BIST 100", value: 9564.22, change: +0.84 },
         { name: "USD/TRY", value: 34.18, change: -0.12 },
         { name: "EUR/TRY", value: 36.45, change: +0.05 },
         { name: "ALTIN", value: 2522.1, change: +0.42 },
+        { name: "GÜMÜŞ", value: 31.5, change: -0.20 },
+        { name: "PETROL", value: 88.4, change: +1.10 },
       ];
 
       function renderStocks() {
