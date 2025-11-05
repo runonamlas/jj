@@ -71,8 +71,9 @@
       async function loadPlaylist() {
         try {
           const res = await fetch(PLAYLIST_URL);
-          playlist = await res.json();
-
+          const data = await res.json();
+          playlist = data.videos || [];
+          
           if (playlist.length > 0) {
             playNext();
           } else {
