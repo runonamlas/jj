@@ -63,19 +63,6 @@
 
 
       /* Saat ve bilgi overlay */
-      .overlay {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background: rgba(0,0,0,0.4);
-        padding: 8px 12px;
-        font-size: 18px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        z-index: 5; /* Butonun altında kalsın */
-      }
 
       /* Sağdaki borsa paneli */
       #sidebar {
@@ -118,15 +105,12 @@
         <div id="play-overlay">
             <button id="playButton">▶ OYNAT</button>
         </div>
-
-        <div class="overlay">
-          <div id="info">Winkel TV</div>
-          <div id="clock"></div>
-        </div>
       </div>
 
       <div id="sidebar">
         <h3>TCMB Kurları</h3>
+        <div id="info">Winkel TV</div>
+          <div id="clock"></div>
         <div id="stocks"></div>
       </div>
     </div>
