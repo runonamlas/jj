@@ -158,7 +158,7 @@
       // Buraya Cloudflare R2 panelinizden aldığınız ...pub.r2.dev adresinizi yazın.
       const BASE_URL = "https://winkeltv.dpdns.org";
       const PLAYLIST_URL = `${BASE_URL}/videos.json`;
-      const FINANCE_API_URL = "https://api.finans.truncgil.com/v4/sondurumbilgileri";
+      const FINANCE_API_URL = "https://jolly-meadow-46df.black-thunder-26f2.workers.dev";
       const player = document.getElementById("player");
       const clock = document.getElementById("clock");
       const stocksDiv = document.getElementById("stocks");
@@ -227,11 +227,9 @@
       function formatApiData(apiData) {
         const filteredData = [];
         const itemsToGet = {
-          "USDTRY": "USD/TRY",
-          "EURTRY": "EUR/TRY",
-          "gram-altin": "ALTIN (GR)",
-          "GBPTRY": "GBP/TRY",
-          "BIST100": "BIST 100" // Bu API BIST 100'ü destekliyorsa
+          "USD": "USD",
+          "EUR": "EUR",
+          "GBP": "GBP",
         };
 
         for (const key in itemsToGet) {
@@ -239,8 +237,7 @@
           if (item) {
             filteredData.push({
               name: itemsToGet[key],
-              value: parseFloat(item.Price),
-              change: parseFloat(item.ChangeRate)
+              value: parseFloat(item.banknoteSelling),
             });
           }
         }
@@ -258,7 +255,7 @@
           <div class="stock">
             <span>${s.name}</span>
             <span style="color:${s.change >= 0 ? '#0f0' : '#f33'}">
-              ${s.value.toFixed(2)} (${s.change >= 0 ? '▲' : '▼'}${Math.abs(s.change)}%)
+              ${s.value.toFixed(2)}
             </span>
           </div>
         `).join('');
@@ -285,7 +282,7 @@
           const data = await res.json();
           
           // Gelen veriyi işle ve global 'stocks' dizisini güncelle
-          stocks = formatApiData(data);
+          stocks = formatApiData(data.currencies);
           
           // Veriler geldiğine göre şimdi ekrana yazdırabiliriz
           renderStocks();
