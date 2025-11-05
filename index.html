@@ -11,91 +11,184 @@
         height: 100%;
         background: #000;
         overflow: hidden;
-        font-family: sans-serif;
+        font-family: 'Segoe UI', sans-serif;
         color: white;
       }
 
-      #container {
+      /* Ana layout: video solda %75, borsa paneli sağda %25 */
+      #layout {
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+      }
+
+      #video-container {
         position: relative;
-        width: 100%;
+        width: 75%;
         height: 100%;
+        background: black;
       }
 
       video {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
+        background: black;
       }
 
+      /* Saat ve bilgi overlay */
       .overlay {
         position: absolute;
         bottom: 0;
+        left: 0;
         width: 100%;
         background: rgba(0,0,0,0.4);
         padding: 8px 12px;
-        font-size: 16px;
+        font-size: 18px;
         display: flex;
         justify-content: space-between;
         align-items: center;
       }
+
+      /* Sağdaki borsa paneli */
+      #sidebar {
+        width: 25%;
+        background: #111;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        padding: 12px;
+        box-sizing: border-box;
+        border-left: 2px solid #222;
+      }
+
+      #sidebar h3 {
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      .stock {
+        display: flex;
+        justify-content: space-between;
+        margin: 6px 0;
+        font-size: 16px;
+      }
+
+      /* Alttaki kayan kurlar */
+      #ticker {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(255,255,255,0.1);
+        color: #00ffcc;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+
+      #ticker span {
+        display: inline-block;
+        padding-left: 100%;
+        animation: scroll 25s linear infinite;
+      }
+
+      @keyframes scroll {
+        from { transform: translateX(0); }
+        to { transform: translateX(-100%); }
+      }
     </style>
   </head>
   <body>
-    <div id="container">
-      <video id="player" autoplay muted controls></video>
-      <div class="overlay">
-        <div id="info">Winkel TV</div>
-        <div id="clock"></div>
+    <div id="layout">
+      <div id="video-container">
+        <video id="player" autoplay muted></video>
+        <div class="overlay">
+          <div id="info">Winkel TV</div>
+          <div id="clock"></div>
+        </div>
+      </div>
+
+      <div id="sidebar">
+        <h3>Borsa Canlı</h3>
+        <div id="stocks"></div>
       </div>
     </div>
+
+    <div id="ticker"><span id="ticker-text">Yükleniyor...</span></div>
 
     <script>
       const BASE_URL = "https://winkeltv.dpdns.org";
       const PLAYLIST_URL = `${BASE_URL}/videos.json`;
-
       const player = document.getElementById("player");
       const clock = document.getElementById("clock");
+      const stocksDiv = document.getElementById("stocks");
+      const tickerText = document.getElementById("ticker-text");
 
       let playlist = [];
       let index = 0;
 
-      // 🕒 canlı saat
+      // 🕒 Saat
       function updateClock() {
-        const now = new Date();
-        clock.textContent = now.toLocaleTimeString("tr-TR");
+        clock.textContent = new Date().toLocaleTimeString("tr-TR");
       }
       setInterval(updateClock, 1000);
       updateClock();
 
-      // 🎬 video oynatma
+      // 🎬 Video oynatma
       async function loadPlaylist() {
         try {
           const res = await fetch(PLAYLIST_URL);
           const data = await res.json();
           playlist = data.videos || [];
-          
-          if (playlist.length > 0) {
-            playNext();
-          } else {
-            console.error("Liste boş");
-          }
+          if (playlist.length > 0) playVideo(0);
         } catch (err) {
           console.error("Video listesi yüklenemedi:", err);
         }
       }
 
-      function playNext() {
-        const videoUrl = `${BASE_URL}/${playlist[index].name}`;
-        player.src = videoUrl;
-        player.play();
-        player.onended = () => {
-          index = (index + 1) % playlist.length;
-          playNext();
-        };
+      function playVideo(i) {
+        index = i;
+        const video = playlist[index];
+        player.src = video.url;
+        player.play().catch(console.error);
+        document.getElementById("info").textContent = video.name;
       }
 
+      player.addEventListener("ended", () => {
+        index = (index + 1) % playlist.length;
+        playVideo(index);
+      });
+
       loadPlaylist();
+
+      // 📊 Sahte borsa verisi (örnek)
+      const stocks = [
+        { name: "BIST 100", value: 9564.22, change: +0.84 },
+        { name: "USD/TRY", value: 34.18, change: -0.12 },
+        { name: "EUR/TRY", value: 36.45, change: +0.05 },
+        { name: "ALTIN", value: 2522.1, change: +0.42 },
+      ];
+
+      function renderStocks() {
+        stocksDiv.innerHTML = stocks.map(s => `
+          <div class="stock">
+            <span>${s.name}</span>
+            <span style="color:${s.change >= 0 ? '#0f0' : '#f33'}">
+              ${s.value.toFixed(2)} (${s.change >= 0 ? '▲' : '▼'}${Math.abs(s.change)}%)
+            </span>
+          </div>
+        `).join('');
+      }
+      renderStocks();
+
+      // 💱 Kayan kurlar
+      function updateTicker() {
+        tickerText.textContent = stocks.map(s =>
+          `${s.name}: ${s.value.toFixed(2)} (${s.change >= 0 ? '▲' : '▼'}${Math.abs(s.change)}%)`
+        ).join(" | ");
+      }
+      updateTicker();
+      setInterval(updateTicker, 10000);
     </script>
   </body>
 </html>
-
