@@ -233,14 +233,11 @@
           "GBP": "GBP",
         };
 
-        for (const key in itemsToGet) {
-          const item = apiData.find(d => d.Symbol === key);
-          if (item) {
+        for (const key in apiData) {
             filteredData.push({
-              name: itemsToGet[key],
-              value: parseFloat(item.banknoteSelling),
+              name: apiData[key].name,
+              value: parseFloat(apiData[key].banknoteSelling),
             });
-          }
         }
         return filteredData;
       }
