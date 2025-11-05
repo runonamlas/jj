@@ -148,10 +148,10 @@
 
       function playVideo(i) {
         index = i;
-        const videoUrl = ${BASE_URL}/${playlist[index].name};
+        const videoUrl = `${BASE_URL}/${playlist[index].name}`; 
         player.src = videoUrl;
         player.play().catch(console.error);
-        document.getElementById("info").textContent = video.name;
+        document.getElementById("info").textContent = playlist[index].name;
       }
 
       player.addEventListener("ended", () => {
