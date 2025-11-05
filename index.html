@@ -222,17 +222,11 @@
 
 
       // 📊 Sahte borsa verisi (örnek)
-      const stocks = [];
+      let stocks = [];
 
       function formatApiData(apiData) {
         console.log(apiData);
         const filteredData = [];
-        const itemsToGet = {
-          "USD": "USD",
-          "EUR": "EUR",
-          "GBP": "GBP",
-        };
-
         for (const key in apiData) {
             filteredData.push({
               name: apiData[key].name,
