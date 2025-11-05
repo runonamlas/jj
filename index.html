@@ -24,7 +24,7 @@
 
       #video-container {
         position: relative;
-        width: 75%;
+        width: 80%;
         height: 100%; /* Yüksekliği 100% yap */
         background: black;
       }
@@ -66,7 +66,7 @@
 
       /* Sağdaki borsa paneli */
       #sidebar {
-        width: 25%;
+        width: 20%;
         height: 100vh; /* Tam yükseklik */
         background: #111;
         display: flex;
@@ -206,7 +206,7 @@
         stocksDiv.innerHTML = stocks.map(s => `
           <div class="stock">
             <span>${s.name}</span>
-            <span style="color:#0f0">
+            <span>
               ${s.value.toFixed(2)}
             </span>
           </div>
